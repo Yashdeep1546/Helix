@@ -1,428 +1,488 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" width="100%"
-  style="background:#0d1117;border-radius:14px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 465" width="100%"
+  style="background:#0d1117;border-radius:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
 
 <defs>
   <!-- Glow filter for animated packets -->
   <filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 
-  <!-- Motion paths (used by animateMotion / mpath) -->
-  <path id="p-req"  d="M 162,183 L 393,183"/>
-  <path id="p-resp" d="M 393,208 L 162,208"/>
-  <path id="p-co"   d="M 578,133 C 642,90 688,90 720,97"/>
-  <path id="p-ci"   d="M 720,113 C 688,115 642,158 578,155"/>
-  <path id="p-do"   d="M 578,253 C 642,290 688,292 720,288"/>
-  <path id="p-di"   d="M 720,272 C 688,268 642,258 578,263"/>
+  <!-- Motion paths for each data hop (10-second cycle) -->
+  <path id="p1" d="M 172,218 L 260,218"/>
+  <path id="p2" d="M 400,218 L 470,218"/>
+  <path id="p3" d="M 610,218 L 680,218"/>
+  <path id="p4" d="M 765,173 C 765,105 815,103 850,103"/>
+  <path id="p5" d="M 850,121 C 815,124 765,127 765,181"/>
+  <path id="p6" d="M 765,296 C 765,363 815,363 850,363"/>
+  <path id="p7" d="M 850,348 C 815,345 765,344 765,291"/>
+  <path id="p8" d="M 680,248 L 172,248"/>
 </defs>
 
 <style>
-  /* ── Flowing dash animations ── */
-  @keyframes fwd  { to { stroke-dashoffset: -28; } }
-  @keyframes rev  { to { stroke-dashoffset:  28; } }
+  /* ── 1. Flowing dash animations ──────────────────────────── */
+  @keyframes fwd { to { stroke-dashoffset: -30; } }
+  @keyframes rev { to { stroke-dashoffset:  30; } }
 
-  /* ── Node border pulse ── */
-  @keyframes pulse-api {
-    0%,100% { stroke-opacity:.65; stroke-width:2; }
-    50%      { stroke-opacity:1;   stroke-width:2.5; }
-  }
-  @keyframes pulse-client {
-    0%,12%,62%,100% { stroke-opacity:.65; }
-    6%               { stroke-opacity:1;  }
-    68%              { stroke-opacity:1;  }
-  }
-  @keyframes pulse-redis {
-    0%,18%,45%,100% { stroke-opacity:.65; }
-    28%              { stroke-opacity:1;  }
-    38%              { stroke-opacity:1;  }
-  }
-  @keyframes pulse-db {
-    0%,23%,62%,100% { stroke-opacity:.65; }
-    38%              { stroke-opacity:1;  }
-    55%              { stroke-opacity:1;  }
+  /* ── 2. Auth laser sweep ─────────────────────────────────── */
+  @keyframes laser {
+    0%,100% { transform: translateY(0px);  opacity: .12; }
+    50%      { transform: translateY(78px); opacity: .85; }
   }
 
-  /* ── ASGI heartbeat ── */
-  @keyframes beat {
-    0%,100% { r:3.5; opacity:.55; }
-    50%      { r:6.5; opacity:1;  }
-  }
+  /* ── 3. Success ripple (SMIL used for r attr, CSS for delay) */
+  /* handled inline with SMIL animate elements */
 
-  /* Dash classes */
-  .dr { stroke:#ff7b72; stroke-width:2; stroke-dasharray:7,11; fill:none; animation:fwd .95s linear infinite; }
-  .dg { stroke:#f0883e; stroke-width:2; stroke-dasharray:7,11; fill:none; animation:rev .95s linear infinite; }
-  .db { stroke:#79c0ff; stroke-width:2; stroke-dasharray:5,9;  fill:none; animation:fwd .80s linear infinite; }
-  .dc { stroke:#39c5cf; stroke-width:2; stroke-dasharray:5,9;  fill:none; animation:rev .80s linear infinite; }
-  .dv { stroke:#56d364; stroke-width:2; stroke-dasharray:7,11; fill:none; animation:fwd 1.15s linear infinite; }
-  .dl { stroke:#aff5b4; stroke-width:2; stroke-dasharray:7,11; fill:none; animation:rev 1.15s linear infinite; }
+  /* ── 4. Node border pulses (keyed to packet timing) ─────── */
+  @keyframes bc { 0%,100%{stroke-opacity:.6}  7%,72%{stroke-opacity:1} }
+  @keyframes bg { 0%,100%{stroke-opacity:.6}  9%,16%{stroke-opacity:1} }
+  @keyframes ba { 0%,100%{stroke-opacity:.6} 17%,25%{stroke-opacity:1} }
+  @keyframes bf { 0%,100%{stroke-opacity:.7;stroke-width:2.5} 50%{stroke-opacity:1;stroke-width:3.2} }
+  @keyframes br { 0%,100%{stroke-opacity:.6} 27%,46%{stroke-opacity:1} }
+  @keyframes bd { 0%,100%{stroke-opacity:.6} 31%,57%{stroke-opacity:1} }
 
-  /* Border pulse classes */
-  .ba { animation:pulse-api    2s   ease-in-out infinite; }
-  .bc { animation:pulse-client 7s   ease-in-out infinite; }
-  .br { animation:pulse-redis  7s   ease-in-out infinite; }
-  .bd { animation:pulse-db     7s   ease-in-out infinite; }
-  .hb { animation:beat         1.5s ease-in-out infinite; }
+  /* ── 5. ASGI heartbeat ───────────────────────────────────── */
+  @keyframes beat { 0%,100%{r:3.5;opacity:.5} 50%{r:6.5;opacity:1} }
+
+  /* Flowing dash line classes */
+  .dr  { stroke:#ff7b72; stroke-width:2.5; stroke-dasharray:8,12;  fill:none; animation:fwd  .90s linear infinite; }
+  .dp  { stroke:#d2a8ff; stroke-width:2;   stroke-dasharray:8,12;  fill:none; animation:fwd  .90s linear infinite; }
+  .dbl { stroke:#79c0ff; stroke-width:2;   stroke-dasharray:8,12;  fill:none; animation:fwd  .90s linear infinite; }
+  .dc  { stroke:#39c5cf; stroke-width:2;   stroke-dasharray:5,9;   fill:none; animation:fwd  .80s linear infinite; }
+  .dc2 { stroke:#79c0ff; stroke-width:2;   stroke-dasharray:5,9;   fill:none; animation:rev  .80s linear infinite; }
+  .dg  { stroke:#56d364; stroke-width:2;   stroke-dasharray:6,10;  fill:none; animation:fwd 1.10s linear infinite; }
+  .dl  { stroke:#aff5b4; stroke-width:2;   stroke-dasharray:6,10;  fill:none; animation:rev 1.10s linear infinite; }
+  .do  { stroke:#f0883e; stroke-width:2.5; stroke-dasharray:8,12;  fill:none; animation:rev  .95s linear infinite; }
+
+  /* Node border pulse classes */
+  .n-client { animation:bc 10s ease-in-out infinite; }
+  .n-gate   { animation:bg 10s ease-in-out infinite; }
+  .n-auth   { animation:ba 10s ease-in-out infinite; }
+  .n-api    { animation:bf  2s ease-in-out infinite; }
+  .n-redis  { animation:br 10s ease-in-out infinite; }
+  .n-db     { animation:bd 10s ease-in-out infinite; }
+
+  .laser { stroke:#d2a8ff; stroke-width:1.8; animation:laser 2.5s ease-in-out infinite; }
+  .hb    { animation:beat 1.5s ease-in-out infinite; }
 </style>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!--  TITLE BAR                                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<rect x="0" y="0" width="980" height="46" rx="14" fill="#161b22"/>
-<rect x="0" y="32" width="980" height="14"         fill="#161b22"/>
-<!-- macOS traffic lights -->
+<rect x="0" y="0" width="1050" height="46" rx="14" fill="#161b22"/>
+<rect x="0" y="32"  width="1050" height="14" fill="#161b22"/>
 <circle cx="22" cy="18" r="6" fill="#ff5f56"/>
 <circle cx="40" cy="18" r="6" fill="#ffbd2e"/>
 <circle cx="58" cy="18" r="6" fill="#27c93f"/>
-<text x="490" y="28" text-anchor="middle" font-size="12" font-weight="700"
-  fill="#58a6ff" letter-spacing="2.5">VECTIS  ·  RUNTIME  DATA  FLOW  MATRIX</text>
+<text x="525" y="28" text-anchor="middle" font-size="12" font-weight="700"
+  fill="#58a6ff" letter-spacing="2">VECTIS  ·  END-TO-END  ASYNC  LIFECYCLE  RUNTIME  GRAPH</text>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  BASE SHADOW LINES  (dim underlay)                       -->
+<!--  SHADOW BASE LINES (dim underlay)                        -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<line x1="162" y1="183" x2="393" y2="183"
-  stroke="#ff7b7222" stroke-width="2"/>
-<line x1="162" y1="208" x2="393" y2="208"
-  stroke="#f0883e22" stroke-width="2"/>
-<path d="M 578,133 C 642,90 688,90 720,97"
-  fill="none" stroke="#79c0ff1a" stroke-width="2"/>
-<path d="M 720,113 C 688,115 642,158 578,155"
-  fill="none" stroke="#39c5cf1a" stroke-width="2"/>
-<path d="M 578,253 C 642,290 688,292 720,288"
-  fill="none" stroke="#56d3641a" stroke-width="2"/>
-<path d="M 720,272 C 688,268 642,258 578,263"
-  fill="none" stroke="#aff5b41a" stroke-width="2"/>
+<!-- Request lane -->
+<line x1="172" y1="218" x2="680" y2="218" stroke="#ff7b7218" stroke-width="2.5"/>
+<!-- Response lane -->
+<line x1="172" y1="248" x2="680" y2="248" stroke="#f0883e18" stroke-width="2.5"/>
+<!-- Gate → Auth -->
+<line x1="400" y1="218" x2="470" y2="218" stroke="#d2a8ff18" stroke-width="2"/>
+<!-- Auth → FastAPI -->
+<line x1="610" y1="218" x2="680" y2="218" stroke="#79c0ff18" stroke-width="2"/>
+<!-- Cache paths -->
+<path d="M 765,173 C 765,105 815,103 850,103" fill="none" stroke="#39c5cf14" stroke-width="2"/>
+<path d="M 850,121 C 815,124 765,127 765,181" fill="none" stroke="#79c0ff14" stroke-width="2"/>
+<!-- DB paths -->
+<path d="M 765,296 C 765,363 815,363 850,363" fill="none" stroke="#56d36414" stroke-width="2"/>
+<path d="M 850,348 C 815,345 765,344 765,291" fill="none" stroke="#aff5b414" stroke-width="2"/>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  ANIMATED FLOWING DASH LINES                             -->
+<!--  ANIMATED FLOWING DASH LINES  (Animation Type 1)         -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<line x1="162" y1="183" x2="393" y2="183" class="dr"/>
-<line x1="162" y1="208" x2="393" y2="208" class="dg"/>
-<path d="M 578,133 C 642,90 688,90 720,97"   class="db"/>
-<path d="M 720,113 C 688,115 642,158 578,155" class="dc"/>
-<path d="M 578,253 C 642,290 688,292 720,288" class="dv"/>
-<path d="M 720,272 C 688,268 642,258 578,263" class="dl"/>
+<line x1="172" y1="218" x2="260" y2="218" class="dr"/>
+<line x1="400" y1="218" x2="470" y2="218" class="dp"/>
+<line x1="610" y1="218" x2="680" y2="218" class="dbl"/>
+<path d="M 765,173 C 765,105 815,103 850,103" class="dc"/>
+<path d="M 850,121 C 815,124 765,127 765,181" class="dc2"/>
+<path d="M 765,296 C 765,363 815,363 850,363" class="dg"/>
+<path d="M 850,348 C 815,345 765,344 765,291" class="dl"/>
+<line x1="680" y1="248" x2="172" y2="248" class="do"/>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!--  ARROWHEADS                                              -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<!-- → FastAPI (request) -->
-<polygon points="391,178 403,183 391,188"   fill="#ff7b72"/>
-<!-- ← Client (response) -->
-<polygon points="164,203 152,208 164,213"   fill="#f0883e"/>
-<!-- → Redis (cache out) – path ends near-horizontal at (720,97) -->
-<polygon points="718,93 728,97 718,102"     fill="#79c0ff"/>
-<!-- ← FastAPI (cache in) – path ends left at (578,155) -->
-<polygon points="581,150 570,155 581,160"   fill="#39c5cf"/>
-<!-- → Postgres (db out) – path ends near-horizontal at (720,288) -->
-<polygon points="718,284 728,288 718,293"   fill="#56d364"/>
-<!-- ← FastAPI (db in) – path ends left at (578,263) -->
-<polygon points="581,258 570,263 581,268"   fill="#aff5b4"/>
+<!-- ① → Gate -->
+<polygon points="258,213 270,218 258,223" fill="#ff7b72"/>
+<!-- ② → Auth -->
+<polygon points="468,213 480,218 468,223" fill="#d2a8ff"/>
+<!-- ③ → FastAPI -->
+<polygon points="678,213 690,218 678,223" fill="#79c0ff"/>
+<!-- ④ → Redis -->
+<polygon points="848,99 858,103 847,108"  fill="#39c5cf"/>
+<!-- ⑤ → FastAPI (from Redis) -->
+<polygon points="762,179 766,192 771,179" fill="#79c0ff"/>
+<!-- ⑥ → Postgres -->
+<polygon points="848,359 858,363 847,368" fill="#56d364"/>
+<!-- ⑦ → FastAPI (from Postgres) -->
+<polygon points="762,289 766,302 771,289" fill="#aff5b4"/>
+<!-- ⑧ → Client (response) -->
+<polygon points="174,243 162,248 174,253" fill="#f0883e"/>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  STATIC STEP LABELS on each lane (always visible)        -->
+<!--  NODE 1: HTTP CLIENT                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<text x="278" y="174" text-anchor="middle" font-size="8" fill="#ff7b7266"
-  letter-spacing=".5">① HTTP REQUEST</text>
-<text x="278" y="222" text-anchor="middle" font-size="8" fill="#f0883e66"
-  letter-spacing=".5">⑥ HTTP RESPONSE</text>
-<text x="648" y="78"  text-anchor="middle" font-size="8" fill="#79c0ff66"
-  letter-spacing=".5">② CACHE CHECK</text>
-<text x="648" y="173" text-anchor="middle" font-size="8" fill="#39c5cf66"
-  letter-spacing=".5">③ CACHE HIT</text>
-<text x="648" y="312" text-anchor="middle" font-size="8" fill="#56d36466"
-  letter-spacing=".5">④ DB QUERY</text>
-<text x="648" y="248" text-anchor="middle" font-size="8" fill="#aff5b466"
-  letter-spacing=".5">⑤ DB RESULT</text>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!--  NODE: HTTP CLIENT                                        -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<rect x="20"  y="128" width="140" height="134" rx="10" fill="#ff7b720a"/>
-<rect x="20"  y="128" width="140" height="134" rx="10"
-  fill="#161b22" stroke="#ff7b72" stroke-width="1.5" class="bc"/>
-<rect x="20"  y="128" width="140" height="34"  rx="10" fill="#ff7b7218"/>
-<rect x="20"  y="150" width="140" height="12"          fill="#ff7b7218"/>
-<text x="90"  y="150" text-anchor="middle" font-size="11" font-weight="700"
-  fill="#ff7b72" letter-spacing="1.2">HTTP CLIENT</text>
-<line x1="30" y1="168" x2="150" y2="168" stroke="#30363d" stroke-width="1"/>
-<text x="90"  y="185" text-anchor="middle" font-size="10.5" fill="#c9d1d9">🌐  JSON Payloads</text>
-<text x="90"  y="202" text-anchor="middle" font-size="10.5" fill="#c9d1d9">🔑  Bearer Token</text>
-<text x="90"  y="219" text-anchor="middle" font-size="10.5" fill="#c9d1d9">📡  HTTPS / REST</text>
-<text x="90"  y="236" text-anchor="middle" font-size="10"   fill="#8b949e">Pydantic Response</text>
-<text x="90"  y="251" text-anchor="middle" font-size="10"   fill="#8b949e">HTTP 200 / 4xx / 5xx</text>
-<!-- port connectors -->
-<circle cx="162" cy="183" r="3.5" fill="#ff7b72"/>
-<circle cx="162" cy="208" r="3.5" fill="#f0883e"/>
+<g transform="translate(30,185)">
+  <!-- Success Ripples  (Animation Type 5) -->
+  <circle cx="142" cy="63" r="5" fill="none" stroke="#56d364" stroke-width="1.5">
+    <animate attributeName="r"       values="5;52"    dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.85;0"  dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="142" cy="63" r="5" fill="none" stroke="#56d364" stroke-width="1.5">
+    <animate attributeName="r"       values="5;52"    dur="3s" begin="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.85;0"  dur="3s" begin="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Box -->
+  <rect width="140" height="110" rx="10" fill="#1c1f26" stroke="#ff7b72" stroke-width="1.5" class="n-client"/>
+  <rect width="140" height="33"  rx="10" fill="#ff7b7218"/>
+  <rect y="21"     width="140" height="12" fill="#ff7b7218"/>
+  <text x="70" y="21"  text-anchor="middle" font-size="11" font-weight="700" fill="#ff7b72" letter-spacing=".8">HTTP CLIENT</text>
+  <line x1="10" y1="37" x2="130" y2="37" stroke="#30363d" stroke-width="1"/>
+  <text x="70" y="55"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🌐  SPA / Mobile App</text>
+  <text x="70" y="72"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🔑  Bearer JWT Token</text>
+  <text x="70" y="89"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">📡  JSON / HTTPS</text>
+  <text x="70" y="105" text-anchor="middle" font-size="9"    fill="#8b949e">200 OK · 4xx · 5xx</text>
+  <!-- port dots -->
+  <circle cx="142" cy="33"  r="3" fill="#ff7b72"/>
+  <circle cx="142" cy="63"  r="3" fill="#f0883e"/>
+</g>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  NODE: FASTAPI ENGINE (centre)                            -->
+<!--  NODE 2: SLOWAPI RATE GATE                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<rect x="393" y="84"  width="185" height="226" rx="10" fill="#1f6feb0a"/>
-<rect x="393" y="84"  width="185" height="226" rx="10"
-  fill="#161b22" stroke="#1f6feb" stroke-width="2" class="ba"/>
-<rect x="393" y="84"  width="185" height="38"  rx="10" fill="#1f6feb1a"/>
-<rect x="393" y="110" width="185" height="12"          fill="#1f6feb1a"/>
-<text x="485" y="110" text-anchor="middle" font-size="12" font-weight="700"
-  fill="#58a6ff" letter-spacing="1.2">⚡ FASTAPI ENGINE</text>
-<line x1="408" y1="128" x2="563" y2="128" stroke="#30363d" stroke-width="1"/>
-
-<text x="408" y="147" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="147" font-size="10.5" fill="#c9d1d9">JWT Auth Guards</text>
-
-<text x="408" y="164" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="164" font-size="10.5" fill="#c9d1d9">Rate Limit Throttling</text>
-
-<text x="408" y="181" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="181" font-size="10.5" fill="#c9d1d9">Pydantic v2 Schemas</text>
-
-<text x="408" y="198" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="198" font-size="10.5" fill="#c9d1d9">async/await Routes</text>
-
-<text x="408" y="215" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="215" font-size="10.5" fill="#c9d1d9">Cursor Pagination</text>
-
-<text x="408" y="232" font-size="9"    fill="#3fb950">▶</text>
-<text x="421" y="232" font-size="10.5" fill="#c9d1d9">Cache Strategy</text>
-
-<line x1="408" y1="243" x2="563" y2="243" stroke="#30363d" stroke-width="1"/>
-
-<!-- Heartbeat/ASGI-alive indicator -->
-<circle cx="430" cy="266" r="3.5" fill="#3fb950" class="hb"/>
-<text x="443" y="270" font-size="9" fill="#3fb950">ASGI  ·  running</text>
-<text x="563" y="296" text-anchor="end" font-size="8" fill="#30363d"
-  font-family="monospace">Python 3.11+</text>
-
-<!-- Port connectors -->
-<circle cx="393" cy="183" r="3.5" fill="#ff7b72"/>
-<circle cx="393" cy="208" r="3.5" fill="#f0883e"/>
-<circle cx="578" cy="133" r="3.5" fill="#79c0ff"/>
-<circle cx="578" cy="155" r="3.5" fill="#39c5cf"/>
-<circle cx="578" cy="253" r="3.5" fill="#56d364"/>
-<circle cx="578" cy="263" r="3.5" fill="#aff5b4"/>
+<g transform="translate(260,185)">
+  <rect width="140" height="110" rx="10" fill="#1c1f26" stroke="#d2a8ff" stroke-width="1.5" class="n-gate"/>
+  <rect width="140" height="33"  rx="10" fill="#d2a8ff18"/>
+  <rect y="21"     width="140" height="12" fill="#d2a8ff18"/>
+  <text x="70" y="21"  text-anchor="middle" font-size="11" font-weight="700" fill="#d2a8ff" letter-spacing=".8">SLOWAPI GATE</text>
+  <line x1="10" y1="37" x2="130" y2="37" stroke="#30363d" stroke-width="1"/>
+  <text x="70" y="55"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🛡️  Rate Limiter</text>
+  <text x="70" y="72"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">⏱️  Sliding Window</text>
+  <text x="70" y="89"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">📊  Request Counter</text>
+  <text x="70" y="105" text-anchor="middle" font-size="9"    fill="#8b949e">429 Too Many Requests</text>
+  <circle cx="0"   cy="33" r="3" fill="#d2a8ff"/>
+  <circle cx="140" cy="33" r="3" fill="#d2a8ff"/>
+</g>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  NODE: REDIS 7.x                                         -->
+<!--  NODE 3: OAUTH2 AUTH GUARD  (Auth Laser – Animation 2)  -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<rect x="720" y="45"  width="218" height="115" rx="10" fill="#79c0ff08"/>
-<rect x="720" y="45"  width="218" height="115" rx="10"
-  fill="#161b22" stroke="#79c0ff" stroke-width="1.5" class="br"/>
-<rect x="720" y="45"  width="218" height="34"  rx="10" fill="#79c0ff14"/>
-<rect x="720" y="67"  width="218" height="12"          fill="#79c0ff14"/>
-<text x="829" y="67"  text-anchor="middle" font-size="11" font-weight="700"
-  fill="#79c0ff" letter-spacing="1.2">🗄️  REDIS 7.x</text>
-<line x1="735" y1="85" x2="923" y2="85" stroke="#30363d" stroke-width="1"/>
-<text x="829" y="103" text-anchor="middle" font-size="10"
-  fill="#c9d1d9" font-family="monospace">O(1) In-Memory Cache</text>
-<text x="829" y="119" text-anchor="middle" font-size="10" fill="#8b949e">Write-Through · TTL Eviction</text>
-<text x="829" y="135" text-anchor="middle" font-size="10" fill="#8b949e">Rate Limiter · Pub/Sub</text>
-<!-- port connectors -->
-<circle cx="720" cy="97"  r="3.5" fill="#79c0ff"/>
-<circle cx="720" cy="113" r="3.5" fill="#39c5cf"/>
+<g transform="translate(470,185)">
+  <!-- Laser line (Animation Type 2: security scanner) -->
+  <line x1="12" y1="40" x2="128" y2="40" class="laser"/>
+  <!-- Box -->
+  <rect width="140" height="110" rx="10" fill="#1c1f26" stroke="#d2a8ff" stroke-width="1.5" class="n-auth"/>
+  <rect width="140" height="33"  rx="10" fill="#d2a8ff18"/>
+  <rect y="21"     width="140" height="12" fill="#d2a8ff18"/>
+  <text x="70" y="21"  text-anchor="middle" font-size="11" font-weight="700" fill="#d2a8ff" letter-spacing=".8">OAUTH2 GUARD</text>
+  <line x1="10" y1="37" x2="130" y2="37" stroke="#30363d" stroke-width="1"/>
+  <text x="70" y="55"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🔐  JWT Verify</text>
+  <text x="70" y="72"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🧂  pwdlib Crypt</text>
+  <text x="70" y="89"  text-anchor="middle" font-size="10.5" fill="#c9d1d9">🎫  Stateless Auth</text>
+  <text x="70" y="105" text-anchor="middle" font-size="9"    fill="#8b949e">401 Unauthorized · 403</text>
+  <circle cx="0"   cy="33" r="3" fill="#d2a8ff"/>
+  <circle cx="140" cy="33" r="3" fill="#79c0ff"/>
+</g>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  NODE: POSTGRESQL                                         -->
+<!--  NODE 4: FASTAPI ASGI ENGINE  (Heartbeat – Animation 4) -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<rect x="720" y="240" width="218" height="115" rx="10" fill="#56d36408"/>
-<rect x="720" y="240" width="218" height="115" rx="10"
-  fill="#161b22" stroke="#56d364" stroke-width="1.5" class="bd"/>
-<rect x="720" y="240" width="218" height="34"  rx="10" fill="#56d36414"/>
-<rect x="720" y="262" width="218" height="12"          fill="#56d36414"/>
-<text x="829" y="262" text-anchor="middle" font-size="11" font-weight="700"
-  fill="#56d364" letter-spacing="1.2">🐘  POSTGRESQL</text>
-<line x1="735" y1="280" x2="923" y2="280" stroke="#30363d" stroke-width="1"/>
-<text x="829" y="298" text-anchor="middle" font-size="10"
-  fill="#c9d1d9" font-family="monospace">asyncpg · AsyncSession</text>
-<text x="829" y="314" text-anchor="middle" font-size="10" fill="#8b949e">Connection Pooling · ACID</text>
-<text x="829" y="330" text-anchor="middle" font-size="10" fill="#8b949e">SQLModel ORM · Migrations</text>
-<!-- port connectors -->
-<circle cx="720" cy="288" r="3.5" fill="#56d364"/>
-<circle cx="720" cy="272" r="3.5" fill="#aff5b4"/>
+<g transform="translate(680,168)">
+  <rect width="170" height="152" rx="10" fill="#0d111708"/>
+  <rect width="170" height="152" rx="10" fill="#0d1117" stroke="#1f6feb" stroke-width="2.5" class="n-api"/>
+  <rect width="170" height="36"  rx="10" fill="#1f6feb1a"/>
+  <rect y="23"     width="170" height="13" fill="#1f6feb1a"/>
+  <text x="85" y="23"  text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff" letter-spacing=".8">⚡ FASTAPI ASGI</text>
+  <line x1="10" y1="43" x2="160" y2="43" stroke="#30363d" stroke-width="1"/>
+  <text x="85" y="63"  text-anchor="middle" font-size="10"   fill="#8b949e">Async Event Loop</text>
+  <text x="85" y="81"  text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">Pydantic V2 Core</text>
+  <text x="85" y="99"  text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">Dependency Inject</text>
+  <text x="85" y="117" text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">Cursor Pagination</text>
+  <text x="85" y="135" text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">Cache Strategy</text>
+  <line x1="10" y1="142" x2="160" y2="142" stroke="#30363d" stroke-width="1"/>
+  <!-- ASGI heartbeat (Animation Type 4) -->
+  <circle cx="28" cy="150" r="3.5" fill="#3fb950" class="hb"/>
+  <text x="40" y="154" font-size="9" fill="#3fb950">ASGI  ·  running</text>
+  <!-- port dots -->
+  <circle cx="0"   cy="50" r="3" fill="#ff7b72"/>
+  <circle cx="0"   cy="80" r="3" fill="#f0883e"/>
+  <circle cx="85"  cy="5"  r="3" fill="#39c5cf"/>
+  <circle cx="85"  cy="13" r="3" fill="#79c0ff"/>
+  <circle cx="85"  cy="128" r="3" fill="#56d364"/>
+  <circle cx="85"  cy="123" r="3" fill="#aff5b4"/>
+</g>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  ANIMATED PACKETS  (7 s total cycle)                     -->
+<!--  NODE 5: REDIS CACHE  (Animation Type 3: cache ping)    -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<g transform="translate(850,55)">
+  <rect width="175" height="100" rx="10" fill="#1c1f26" stroke="#79c0ff" stroke-width="1.5" class="n-redis"/>
+  <rect width="175" height="33"  rx="10" fill="#79c0ff14"/>
+  <rect y="21"     width="175" height="12" fill="#79c0ff14"/>
+  <text x="87" y="21"  text-anchor="middle" font-size="11" font-weight="700" fill="#79c0ff" letter-spacing=".8">REDIS CACHE</text>
+  <line x1="10" y1="37" x2="165" y2="37" stroke="#30363d" stroke-width="1"/>
+  <text x="87" y="56"  text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">O(1) Read / Write</text>
+  <text x="87" y="72"  text-anchor="middle" font-size="10"   fill="#8b949e">Write-Through · TTL</text>
+  <text x="87" y="87"  text-anchor="middle" font-size="10"   fill="#8b949e">Rate Limiter Backend</text>
+  <circle cx="0"  cy="48" r="3" fill="#39c5cf"/>
+  <circle cx="0"  cy="66" r="3" fill="#79c0ff"/>
+</g>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  NODE 6: POSTGRESQL  (Animation Type 3: async db fluid) -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<g transform="translate(850,315)">
+  <rect width="175" height="100" rx="10" fill="#1c1f26" stroke="#56d364" stroke-width="1.5" class="n-db"/>
+  <rect width="175" height="33"  rx="10" fill="#56d36414"/>
+  <rect y="21"     width="175" height="12" fill="#56d36414"/>
+  <text x="87" y="21"  text-anchor="middle" font-size="11" font-weight="700" fill="#56d364" letter-spacing=".8">POSTGRESQL</text>
+  <line x1="10" y1="37" x2="165" y2="37" stroke="#30363d" stroke-width="1"/>
+  <text x="87" y="56"  text-anchor="middle" font-size="10"   fill="#c9d1d9" font-family="monospace">asyncpg · Pool</text>
+  <text x="87" y="72"  text-anchor="middle" font-size="10"   fill="#8b949e">AsyncSession · ACID</text>
+  <text x="87" y="87"  text-anchor="middle" font-size="10"   fill="#8b949e">SQLModel ORM</text>
+  <circle cx="0"  cy="48" r="3" fill="#56d364"/>
+  <circle cx="0"  cy="33" r="3" fill="#aff5b4"/>
+</g>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  ANIMATED PACKETS  (10-second cycle)                     -->
 <!--                                                          -->
-<!--  ①  req      0.00 s → 1.00 s  (0.000 → 0.143)          -->
-<!--  ②  co       1.30 s → 2.10 s  (0.186 → 0.300)          -->
-<!--  ③  ci       2.30 s → 3.10 s  (0.329 → 0.443)          -->
-<!--  ④  do       1.60 s → 2.60 s  (0.229 → 0.371)          -->
-<!--  ⑤  di       3.40 s → 4.20 s  (0.486 → 0.600)          -->
-<!--  ⑥  resp     4.60 s → 5.60 s  (0.657 → 0.800)          -->
+<!--  ① req:   0.00 → 0.70s  (0.000 → 0.070)                -->
+<!--  ② gate:  0.85 → 1.55s  (0.085 → 0.155)                -->
+<!--  ③ auth:  1.70 → 2.40s  (0.170 → 0.240)                -->
+<!--  ④ co:    2.60 → 3.40s  (0.260 → 0.340)  ─── async ──  -->
+<!--  ⑤ ci:    3.60 → 4.40s  (0.360 → 0.440)       ↕       -->
+<!--  ⑥ do:    3.00 → 4.00s  (0.300 → 0.400)  ─── async ──  -->
+<!--  ⑦ di:    4.50 → 5.40s  (0.450 → 0.540)               -->
+<!--  ⑧ resp:  6.00 → 7.20s  (0.600 → 0.720)               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 
-<!-- ① REQUEST  Client → FastAPI  (red) -->
-<circle r="8" fill="#ff7b72" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.143;1" keyPoints="0;1;1">
-    <mpath href="#p-req"/>
+<!-- ① REQUEST  Client → Gate  (red) -->
+<circle r="9" fill="#ff7b72" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.070;1" keyPoints="0;1;1">
+    <mpath href="#p1"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="1;1;0;0" keyTimes="0;0.143;0.170;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="1;1;0;0" keyTimes="0;0.070;0.092;1"/>
 </circle>
 
-<!-- ② CACHE CHECK  FastAPI → Redis  (blue) -->
-<circle r="8" fill="#79c0ff" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.186;0.300;1" keyPoints="0;0;1;1">
-    <mpath href="#p-co"/>
+<!-- ② GATE PASS  Gate → Auth  (purple) -->
+<circle r="9" fill="#d2a8ff" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.085;0.155;1" keyPoints="0;0;1;1">
+    <mpath href="#p2"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="0;0;1;1;0;0" keyTimes="0;0.180;0.186;0.300;0.322;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.079;0.085;0.155;0.178;1"/>
 </circle>
 
-<!-- ③ CACHE HIT  Redis → FastAPI  (cyan) -->
-<circle r="8" fill="#39c5cf" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.329;0.443;1" keyPoints="0;0;1;1">
-    <mpath href="#p-ci"/>
+<!-- ③ AUTH PASS  Auth → FastAPI  (blue) -->
+<circle r="9" fill="#79c0ff" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.170;0.240;1" keyPoints="0;0;1;1">
+    <mpath href="#p3"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="0;0;1;1;0;0" keyTimes="0;0.323;0.329;0.443;0.465;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.164;0.170;0.240;0.263;1"/>
 </circle>
 
-<!-- ④ DB QUERY  FastAPI → Postgres  (green) -->
-<circle r="8" fill="#56d364" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.229;0.371;1" keyPoints="0;0;1;1">
-    <mpath href="#p-do"/>
+<!-- ④ CACHE OUT  FastAPI → Redis  (cyan) -->
+<circle r="9" fill="#39c5cf" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.260;0.340;1" keyPoints="0;0;1;1">
+    <mpath href="#p4"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="0;0;1;1;0;0" keyTimes="0;0.223;0.229;0.371;0.393;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.254;0.260;0.340;0.363;1"/>
 </circle>
 
-<!-- ⑤ DB RESULT  Postgres → FastAPI  (lime) -->
-<circle r="8" fill="#aff5b4" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.486;0.600;1" keyPoints="0;0;1;1">
-    <mpath href="#p-di"/>
+<!-- ⑤ CACHE HIT  Redis → FastAPI  (light blue) -->
+<circle r="9" fill="#79c0ff" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.360;0.440;1" keyPoints="0;0;1;1">
+    <mpath href="#p5"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="0;0;1;1;0;0" keyTimes="0;0.480;0.486;0.600;0.622;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.354;0.360;0.440;0.463;1"/>
 </circle>
 
-<!-- ⑥ RESPONSE  FastAPI → Client  (orange/gold) -->
-<circle r="8" fill="#f0883e" filter="url(#glow)">
-  <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
-    keyTimes="0;0.657;0.800;1" keyPoints="0;0;1;1">
-    <mpath href="#p-resp"/>
+<!-- ⑥ DB QUERY  FastAPI → Postgres  (green) — fires async alongside cache -->
+<circle r="9" fill="#56d364" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.300;0.400;1" keyPoints="0;0;1;1">
+    <mpath href="#p6"/>
   </animateMotion>
-  <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-    values="0;0;1;1;0;0" keyTimes="0;0.651;0.657;0.800;0.822;1"/>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.294;0.300;0.400;0.423;1"/>
+</circle>
+
+<!-- ⑦ DB RESULT  Postgres → FastAPI  (lime) -->
+<circle r="9" fill="#aff5b4" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.450;0.540;1" keyPoints="0;0;1;1">
+    <mpath href="#p7"/>
+  </animateMotion>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.444;0.450;0.540;0.563;1"/>
+</circle>
+
+<!-- ⑧ RESPONSE  FastAPI → Client  (gold) — larger dot signals completion -->
+<circle r="11" fill="#f0883e" filter="url(#glow)">
+  <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear"
+    keyTimes="0;0.600;0.720;1" keyPoints="0;0;1;1">
+    <mpath href="#p8"/>
+  </animateMotion>
+  <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+    values="0;0;1;1;0;0" keyTimes="0;0.594;0.600;0.720;0.743;1"/>
 </circle>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!--  ANIMATED STATUS BADGE LABELS                            -->
-<!--  (appear in sync with each travelling packet)            -->
+<!--  ANIMATED STATUS BADGES (sync'd to each packet)          -->
 <!-- ══════════════════════════════════════════════════════════ -->
 
-<!-- ① REQUEST badge -->
+<!-- ① HTTP REQUEST -->
 <g>
-  <rect x="198" y="157" width="160" height="22" rx="5" fill="#ff7b7218" stroke="#ff7b7244" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="1;1;0;0" keyTimes="0;0.155;0.210;1"/>
+  <rect x="170" y="196" width="120" height="20" rx="4" fill="#ff7b7218" stroke="#ff7b7248" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="1;1;0;0" keyTimes="0;0.085;0.120;1"/>
   </rect>
-  <text x="278" y="172" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#ff7b72" letter-spacing=".8">
-    ① HTTP REQUEST  →
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="1;1;0;0" keyTimes="0;0.155;0.210;1"/>
+  <text x="230" y="210" text-anchor="middle" font-size="9" font-weight="700" fill="#ff7b72" letter-spacing=".5">
+    ① HTTP REQUEST →
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="1;1;0;0" keyTimes="0;0.085;0.120;1"/>
   </text>
 </g>
 
-<!-- ② CACHE CHECK badge -->
+<!-- ② RATE CHECK -->
 <g>
-  <rect x="574" y="63" width="148" height="22" rx="5" fill="#79c0ff18" stroke="#79c0ff44" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.180;0.186;0.305;0.340;1"/>
+  <rect x="390" y="196" width="98" height="20" rx="4" fill="#d2a8ff18" stroke="#d2a8ff48" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.079;0.085;0.165;0.200;1"/>
   </rect>
-  <text x="648" y="78" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#79c0ff" letter-spacing=".8">
-    ② CACHE CHECK  →
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.180;0.186;0.305;0.340;1"/>
+  <text x="439" y="210" text-anchor="middle" font-size="9" font-weight="700" fill="#d2a8ff" letter-spacing=".5">
+    ② RATE CHECK →
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.079;0.085;0.165;0.200;1"/>
   </text>
 </g>
 
-<!-- ③ CACHE HIT badge -->
+<!-- ③ JWT AUTH -->
 <g>
-  <rect x="574" y="156" width="148" height="22" rx="5" fill="#39c5cf18" stroke="#39c5cf44" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.323;0.329;0.448;0.483;1"/>
+  <rect x="600" y="196" width="96" height="20" rx="4" fill="#79c0ff18" stroke="#79c0ff48" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.164;0.170;0.250;0.285;1"/>
   </rect>
-  <text x="648" y="171" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#39c5cf" letter-spacing=".8">
-    ← ③ CACHE HIT  ✓
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.323;0.329;0.448;0.483;1"/>
+  <text x="648" y="210" text-anchor="middle" font-size="9" font-weight="700" fill="#79c0ff" letter-spacing=".5">
+    ③ JWT AUTH →
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.164;0.170;0.250;0.285;1"/>
   </text>
 </g>
 
-<!-- ④ DB QUERY badge -->
+<!-- ④ CACHE CHECK -->
 <g>
-  <rect x="574" y="295" width="148" height="22" rx="5" fill="#56d36418" stroke="#56d36444" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.223;0.229;0.376;0.411;1"/>
+  <rect x="746" y="75" width="116" height="20" rx="4" fill="#39c5cf18" stroke="#39c5cf48" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.254;0.260;0.348;0.382;1"/>
   </rect>
-  <text x="648" y="310" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#56d364" letter-spacing=".8">
-    ④ ASYNC DB QUERY  →
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.223;0.229;0.376;0.411;1"/>
+  <text x="804" y="89" text-anchor="middle" font-size="9" font-weight="700" fill="#39c5cf" letter-spacing=".5">
+    ④ CACHE CHECK →
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.254;0.260;0.348;0.382;1"/>
   </text>
 </g>
 
-<!-- ⑤ DB RESULT badge -->
+<!-- ⑤ CACHE HIT -->
 <g>
-  <rect x="574" y="230" width="148" height="22" rx="5" fill="#aff5b418" stroke="#aff5b444" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.480;0.486;0.605;0.640;1"/>
+  <rect x="746" y="157" width="106" height="20" rx="4" fill="#79c0ff18" stroke="#79c0ff48" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.354;0.360;0.448;0.482;1"/>
   </rect>
-  <text x="648" y="245" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#aff5b4" letter-spacing=".8">
-    ← ⑤ DB RESULT
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.480;0.486;0.605;0.640;1"/>
+  <text x="799" y="171" text-anchor="middle" font-size="9" font-weight="700" fill="#79c0ff" letter-spacing=".5">
+    ← ⑤ CACHE HIT ✓
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.354;0.360;0.448;0.482;1"/>
   </text>
 </g>
 
-<!-- ⑥ RESPONSE badge -->
+<!-- ⑥ DB QUERY -->
 <g>
-  <rect x="198" y="214" width="160" height="22" rx="5" fill="#f0883e18" stroke="#f0883e44" stroke-width="1">
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.651;0.657;0.805;0.840;1"/>
+  <rect x="746" y="330" width="106" height="20" rx="4" fill="#56d36418" stroke="#56d36448" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.294;0.300;0.408;0.442;1"/>
   </rect>
-  <text x="278" y="229" text-anchor="middle" font-size="9.5" font-weight="700"
-    fill="#f0883e" letter-spacing=".8">
-    ← ⑥ HTTP RESPONSE
-    <animate attributeName="opacity" dur="7s" repeatCount="indefinite"
-      values="0;0;1;1;0;0" keyTimes="0;0.651;0.657;0.805;0.840;1"/>
+  <text x="799" y="344" text-anchor="middle" font-size="9" font-weight="700" fill="#56d364" letter-spacing=".5">
+    ⑥ ASYNC DB QUERY →
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.294;0.300;0.408;0.442;1"/>
+  </text>
+</g>
+
+<!-- ⑦ DB RESULT -->
+<g>
+  <rect x="746" y="305" width="106" height="20" rx="4" fill="#aff5b418" stroke="#aff5b448" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.444;0.450;0.548;0.582;1"/>
+  </rect>
+  <text x="799" y="319" text-anchor="middle" font-size="9" font-weight="700" fill="#aff5b4" letter-spacing=".5">
+    ← ⑦ DB RESULT
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.444;0.450;0.548;0.582;1"/>
+  </text>
+</g>
+
+<!-- ⑧ RESPONSE 200 -->
+<g>
+  <rect x="345" y="257" width="142" height="20" rx="4" fill="#f0883e18" stroke="#f0883e48" stroke-width="1">
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.594;0.600;0.728;0.762;1"/>
+  </rect>
+  <text x="416" y="271" text-anchor="middle" font-size="9" font-weight="700" fill="#f0883e" letter-spacing=".5">
+    ← ⑧ HTTP RESPONSE 200 ✓
+    <animate attributeName="opacity" dur="10s" repeatCount="indefinite"
+      values="0;0;1;1;0;0" keyTimes="0;0.594;0.600;0.728;0.762;1"/>
   </text>
 </g>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!--  LEGEND BAR                                              -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<rect x="0"   y="390" width="980" height="30" fill="#161b22"/>
-<line x1="0"  y1="390" x2="980" y2="390" stroke="#21262d" stroke-width="1"/>
+<rect x="0" y="438" width="1050" height="27" fill="#161b22"/>
+<line x1="0" y1="438" x2="1050" y2="438" stroke="#21262d" stroke-width="1"/>
 
-<circle cx="28"  cy="405" r="4" fill="#ff7b72" filter="url(#glow)"/>
-<text   x="38"   y="409" font-size="9" fill="#8b949e">① Request</text>
+<circle cx="25"  cy="452" r="4.5" fill="#ff7b72" filter="url(#glow)"/>
+<text   x="36"   y="456" font-size="9" fill="#8b949e">① Request</text>
 
-<circle cx="118" cy="405" r="4" fill="#79c0ff" filter="url(#glow)"/>
-<text   x="128"  y="409" font-size="9" fill="#8b949e">② Cache Check</text>
+<circle cx="112" cy="452" r="4.5" fill="#d2a8ff" filter="url(#glow)"/>
+<text   x="123"  y="456" font-size="9" fill="#8b949e">② Rate Gate</text>
 
-<circle cx="238" cy="405" r="4" fill="#39c5cf" filter="url(#glow)"/>
-<text   x="248"  y="409" font-size="9" fill="#8b949e">③ Cache Hit</text>
+<circle cx="213" cy="452" r="4.5" fill="#79c0ff" filter="url(#glow)"/>
+<text   x="224"  y="456" font-size="9" fill="#8b949e">③ JWT Auth</text>
 
-<circle cx="338" cy="405" r="4" fill="#56d364" filter="url(#glow)"/>
-<text   x="348"  y="409" font-size="9" fill="#8b949e">④ DB Query</text>
+<circle cx="305" cy="452" r="4.5" fill="#39c5cf" filter="url(#glow)"/>
+<text   x="316"  y="456" font-size="9" fill="#8b949e">④ Cache Check</text>
 
-<circle cx="428" cy="405" r="4" fill="#aff5b4" filter="url(#glow)"/>
-<text   x="438"  y="409" font-size="9" fill="#8b949e">⑤ DB Result</text>
+<circle cx="420" cy="452" r="4.5" fill="#79c0ff" filter="url(#glow)"/>
+<text   x="431"  y="456" font-size="9" fill="#8b949e">⑤ Cache Hit</text>
 
-<circle cx="518" cy="405" r="4" fill="#f0883e" filter="url(#glow)"/>
-<text   x="528"  y="409" font-size="9" fill="#8b949e">⑥ Response</text>
+<circle cx="519" cy="452" r="4.5" fill="#56d364" filter="url(#glow)"/>
+<text   x="530"  y="456" font-size="9" fill="#8b949e">⑥ DB Query</text>
 
-<text x="955" y="409" text-anchor="end" font-size="9" fill="#21262d">7 s loop · Vectis v1.0</text>
+<circle cx="613" cy="452" r="4.5" fill="#aff5b4" filter="url(#glow)"/>
+<text   x="624"  y="456" font-size="9" fill="#8b949e">⑦ DB Result</text>
+
+<circle cx="703" cy="452" r="4.5" fill="#f0883e" filter="url(#glow)"/>
+<text   x="714"  y="456" font-size="9" fill="#8b949e">⑧ Response</text>
+
+<text x="1040" y="456" text-anchor="end" font-size="8.5" fill="#30363d">10 s loop · Vectis v1.0</text>
 
 </svg>
