@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" width="100%" style="background:#0d1117; border-radius:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <style>
+    .node-text { fill: #c9d1d9; font-size: 13px; font-weight: 600; text-anchor: middle; }
+    .title-text { fill: #58a6ff; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+    .flow-line { stroke: #30363d; stroke-width: 2; fill: none; }
+    .pulse-line { stroke-width: 2; fill: none; stroke-dasharray: 8, 12; animation: flow 2s linear infinite; }
+    .client-pulse { stroke: #ff7b72; }
+    .cache-pulse { stroke: #79c0ff; }
+    .db-pulse { stroke: #56d364; }
+
+    @keyframes flow {
+      to { stroke-dashoffset: -40; }
+    }
+
+    .box { stroke-width: 1.5; }
+    .box-client { fill: #21262d; stroke: #ff7b72; }
+    .box-fastapi { fill: #161b22; stroke: #1f6feb; stroke-width: 2; }
+    .box-redis { fill: #21262d; stroke: #79c0ff; }
+    .box-db { fill: #21262d; stroke: #56d364; }
+
+    /* Label badges */
+    .badge-client { fill: #ff7b7220; stroke: #ff7b72; stroke-width: 1; }
+    .badge-redis  { fill: #79c0ff20; stroke: #79c0ff; stroke-width: 1; }
+    .badge-db     { fill: #56d36420; stroke: #56d364; stroke-width: 1; }
+    .badge-text   { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-anchor: middle; }
+  </style>
+
+  <!-- Title -->
+  <text x="450" y="28" class="title-text" text-anchor="middle">VECTIS RUNTIME DATA FLOW MATRIX</text>
+
+  <!-- ═══════════════ FLOW LINES ═══════════════ -->
+
+  <!-- Client → FastAPI -->
+  <path d="M 155 165 L 318 165" class="flow-line"/>
+  <path d="M 155 165 L 318 165" class="pulse-line client-pulse"/>
+  <!-- arrowhead -->
+  <polygon points="318,160 328,165 318,170" fill="#ff7b72"/>
+
+  <!-- FastAPI → Redis -->
+  <path d="M 455 130 C 505 60, 565 60, 580 100" class="flow-line"/>
+  <path d="M 455 130 C 505 60, 565 60, 580 100" class="pulse-line cache-pulse"/>
+  <polygon points="576,100 586,96 582,107" fill="#79c0ff"/>
+
+  <!-- FastAPI → PostgreSQL -->
+  <path d="M 455 200 C 505 270, 565 270, 580 230" class="flow-line"/>
+  <path d="M 455 200 C 505 270, 565 270, 580 230" class="pulse-line db-pulse"/>
+  <polygon points="576,224 582,235 586,224" fill="#56d364"/>
+
+  <!-- Redis → FastAPI (return) -->
+  <path d="M 580 115 C 565 75, 505 75, 455 145" class="flow-line" stroke-dasharray="4,6" stroke="#79c0ff40"/>
+
+  <!-- DB → FastAPI (return) -->
+  <path d="M 580 215 C 565 255, 505 255, 455 185" class="flow-line" stroke-dasharray="4,6" stroke="#56d36440"/>
+
+  <!-- ═══════════════ CLIENT NODE ═══════════════ -->
+  <g transform="translate(25, 115)">
+    <rect width="130" height="100" rx="8" class="box box-client"/>
+    <rect x="10" y="8" width="72" height="16" rx="4" class="badge-client"/>
+    <text x="46" y="20" class="badge-text" fill="#ff7b72">HTTP CLIENT</text>
+    <text x="65" y="52" class="node-text">🖥️ Client</text>
+    <text x="65" y="70" fill="#8b949e" font-size="10" text-anchor="middle">JSON Payloads</text>
+    <text x="65" y="86" fill="#8b949e" font-size="10" text-anchor="middle">Bearer Tokens</text>
+  </g>
+
+  <!-- ═══════════════ FASTAPI CORE NODE ═══════════════ -->
+  <g transform="translate(325, 95)">
+    <rect width="135" height="140" rx="8" class="box box-fastapi"/>
+    <text x="67" y="30" class="node-text" fill="#58a6ff">⚡ FastAPI Core</text>
+    <line x1="10" y1="38" x2="125" y2="38" stroke="#30363d" stroke-width="1"/>
+    <text x="67" y="58" fill="#8b949e" font-size="10" text-anchor="middle">Auth Guards</text>
+    <text x="67" y="74" fill="#8b949e" font-size="10" text-anchor="middle">Rate Throttling</text>
+    <text x="67" y="90" fill="#8b949e" font-size="10" text-anchor="middle">Pydantic Schemas</text>
+    <text x="67" y="112" fill="#2ea44f" font-size="11" font-family="monospace" text-anchor="middle">async def</text>
+    <text x="67" y="128" fill="#2ea44f" font-size="11" font-family="monospace" text-anchor="middle">handlers()</text>
+  </g>
+
+  <!-- ═══════════════ REDIS NODE ═══════════════ -->
+  <g transform="translate(580, 45)">
+    <rect width="155" height="95" rx="8" class="box box-redis"/>
+    <rect x="10" y="8" width="60" height="16" rx="4" class="badge-redis"/>
+    <text x="40" y="20" class="badge-text" fill="#79c0ff">CACHE</text>
+    <text x="77" y="50" class="node-text">🗄️ Redis 7.x</text>
+    <text x="77" y="68" fill="#79c0ff" font-size="10" font-family="monospace" text-anchor="middle">O(1) Read Cache</text>
+    <text x="77" y="82" fill="#8b949e" font-size="10" text-anchor="middle">Write-Through</text>
+  </g>
+
+  <!-- ═══════════════ POSTGRES NODE ═══════════════ -->
+  <g transform="translate(580, 185)">
+    <rect width="155" height="95" rx="8" class="box box-db"/>
+    <rect x="10" y="8" width="70" height="16" rx="4" class="badge-db"/>
+    <text x="45" y="20" class="badge-text" fill="#56d364">DATABASE</text>
+    <text x="77" y="50" class="node-text">🐘 PostgreSQL</text>
+    <text x="77" y="68" fill="#56d364" font-size="10" font-family="monospace" text-anchor="middle">asyncpg Pipeline</text>
+    <text x="77" y="82" fill="#8b949e" font-size="10" text-anchor="middle">AsyncSession</text>
+  </g>
+
+  <!-- ═══════════════ LEGEND ═══════════════ -->
+  <g transform="translate(25, 265)">
+    <line x1="0" y1="8" x2="30" y2="8" stroke="#ff7b72" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="36" y="12" fill="#8b949e" font-size="10">Request Flow</text>
+    <line x1="110" y1="8" x2="140" y2="8" stroke="#79c0ff" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="146" y="12" fill="#8b949e" font-size="10">Cache Path</text>
+    <line x1="215" y1="8" x2="245" y2="8" stroke="#56d364" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="251" y="12" fill="#8b949e" font-size="10">DB Path</text>
+  </g>
+</svg>
