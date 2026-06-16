@@ -1,16 +1,16 @@
-# Vectis 🚀
+# Helix 🚀
 
 ### High-Throughput Async Content Engine & Secure Authentication Runtime
 
-Vectis is a production-grade, fully asynchronous REST API built with **FastAPI**, **SQLModel**, and **Redis**. Designed to move beyond standard tutorial-tier implementations, Vectis showcases a battle-hardened architecture featuring dual-token authentication, robust cursor-based pagination, and strict database connection multiplexing.
+Helix is a production-grade, fully asynchronous REST API built with **FastAPI**, **SQLModel**, and **Redis**. Designed to move beyond standard tutorial-tier implementations, Helix showcases a battle-hardened architecture featuring dual-token authentication, robust cursor-based pagination, and strict database connection multiplexing.
 
 ---
 
 ## 🛰️ Animated Data Flow Architecture
 
-The following dynamic diagram illustrates how a client request interacts with the Vectis ecosystem. The animated indicators represent real-time data streaming, cache validation, and asynchronous database execution paths.
+The following dynamic diagram illustrates how a client request interacts with the Helix ecosystem. The animated indicators represent real-time data streaming, cache validation, and asynchronous database execution paths.
 
-![Vectis Animated Data Flow](assets/flow.svg)
+![Helix Animated Data Flow](assets/flow.svg)
 
 ---
 
