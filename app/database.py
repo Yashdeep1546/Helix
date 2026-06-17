@@ -8,7 +8,6 @@ db_url = f"postgresql://{settings.database_username}:{settings.database_password
 
 engine = create_engine(db_url)
 def create_db_and_tables():
-    from app import models
     SQLModel.metadata.create_all(engine)
 
 def get_session():
